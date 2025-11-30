@@ -1,0 +1,41 @@
+global:
+  scrape_interval: 10s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'model-server'
+    static_configs:
+      - targets: ['model-server:8000']
+
+  - job_name: 'flink'
+    static_configs:
+      - targets:
+          - 'flink-jobmanager:9250'
+          - 'flink-taskmanager:9250'
+    metrics_path: /metrics
+    scheme: http
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: ([^:]+)(?::\d+)?
+        replacement: $1:9250-9260
+        target_label: __address__
+      - action: keep
+        source_labels: [__param_module]
+        regex: prometheus
+
+  - job_name: 'flink-jobmanager'
+    static_configs:
+      - targets: ['flink-jobmanager:9250']
+    metrics_path: /metrics
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: flink-jobmanager
+
+  - job_name: 'flink-taskmanager'
+    static_configs:
+      - targets: ['flink-taskmanager:9250']
+    metrics_path: /metrics

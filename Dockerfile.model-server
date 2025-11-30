@@ -1,0 +1,33 @@
+FROM python:3.9-slim
+
+# Устанавливаем системные зависимости
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Создаем рабочую директорию
+WORKDIR /app
+
+# Обновляем pip
+RUN pip install --upgrade pip==23.0.1
+
+# Копируем requirements
+COPY requirements-model-server.txt .
+
+# Устанавливаем Python зависимости
+RUN pip install --no-cache-dir -r requirements-model-server.txt
+
+# Копируем код модели
+COPY scr/model_server.py .
+COPY scr/ /app/scr/
+
+# Создаем директории для модели и данных
+RUN mkdir -p /app/model /app/data
+
+# Открываем порт для модели
+EXPOSE 8000
+
+# Запускаем сервер модели
+CMD ["python", "model_server.py"]

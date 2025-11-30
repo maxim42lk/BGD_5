@@ -1,0 +1,20 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Обновляем pip
+RUN pip install --upgrade pip==23.0.1
+
+# Копируем requirements
+COPY requirements-medical.txt .
+
+# Устанавливаем зависимости
+RUN pip install --no-cache-dir -r requirements-medical.txt
+
+# Копируем скрипт загрузки данных
+COPY scr/medical_data_loader.py .
+
+# Создаем директорию для данных
+RUN mkdir -p /app/data
+
+CMD ["python", "medical_data_loader.py"]

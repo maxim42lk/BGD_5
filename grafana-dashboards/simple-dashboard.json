@@ -1,0 +1,19 @@
+{
+  "dashboard": {
+    "title": "Simple Sentiment Analysis",
+    "panels": [
+      {
+        "title": "Flink Job Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "flink_jobmanager_numRunningJobs",
+            "legendFormat": "Running Jobs"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      }
+    ],
+    "time": {"from": "now-1h", "to": "now"}
+  }
+}

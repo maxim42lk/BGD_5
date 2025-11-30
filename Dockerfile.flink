@@ -1,0 +1,41 @@
+FROM flink:1.17.1-scala_2.12-java11
+
+# Устанавливаем Python 3.9 и необходимые пакеты
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip python3-venv && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Создаем виртуальное окружение Python
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Обновляем pip
+RUN pip install --upgrade pip==23.0.1
+
+# Копируем requirements и устанавливаем зависимости
+COPY requirements-flink.txt /opt/flink/
+RUN pip install --no-cache-dir -r /opt/flink/requirements-flink.txt
+
+# Копируем JAR файлы для Kafka connector
+COPY lib/*.jar /opt/flink/lib/
+
+# Копируем наш Python код
+RUN mkdir -p /app/scr
+COPY scr /app/scr
+
+# Создаем директорию для данных
+RUN mkdir -p /app/data
+
+# Устанавливаем рабочую директорию
+WORKDIR /app
+
+# Копируем скрипт запуска
+COPY start-flink.sh /app/
+RUN chmod +x /app/start-flink.sh
+
+# Открываем порты для Flink UI и метрик
+EXPOSE 8081 9250
+
+# Запускаем Flink
+CMD ["/app/start-flink.sh"]
